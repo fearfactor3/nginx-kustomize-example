@@ -31,9 +31,9 @@ spec:
             deny:
               conditions:
                 any:
-                  - key: "{{ element.livenessProbe }}"
-                    operator: Equals
-                    value: null
+                  - key: "livenessProbe"
+                    operator: AnyNotIn
+                    value: "{{ keys(element) }}"
     - name: require-readiness-probe
       match:
         any:
@@ -55,6 +55,6 @@ spec:
             deny:
               conditions:
                 any:
-                  - key: "{{ element.readinessProbe }}"
-                    operator: Equals
-                    value: null
+                  - key: "readinessProbe"
+                    operator: AnyNotIn
+                    value: "{{ keys(element) }}"
