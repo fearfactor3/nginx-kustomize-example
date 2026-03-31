@@ -5,7 +5,7 @@ Prerequisites and one-time developer setup for working with this repository.
 ## Required Tools
 
 | Tool | Version | Install |
-|---|---|---|
+| --- | --- | --- |
 | `kubectl` | >= 1.29 | [docs](https://kubernetes.io/docs/tasks/tools/) |
 | `kustomize` | >= 5.4 | `brew install kustomize` |
 | `kyverno` CLI | v1.13.6 | See below |
@@ -77,7 +77,9 @@ kubectl get applications -n argocd
 
 Kyverno and its ClusterPolicies are managed by the `stacks/kyverno` stack in
 [argocd-eks-terraform](https://github.com/fearfactor3/argocd-eks-terraform) and are
-applied automatically via Spacelift. No manual policy steps are required here.
+applied automatically via Spacelift. The policy YAML files in `kyverno/policies/`
+are the source of truth — Terraform fetches them from `main` at apply time.
+No manual policy steps are required here.
 
 After gaining cluster access, apply the ArgoCD AppProject and Applications once per
 cluster. ArgoCD will manage all subsequent changes via GitOps.

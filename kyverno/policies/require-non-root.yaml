@@ -1,0 +1,92 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-non-root
+  annotations:
+    policies.kyverno.io/title: Require Non-Root Containers
+    policies.kyverno.io/description: >-
+      Containers must run as non-root and drop ALL capabilities.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-run-as-non-root
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kyverno
+                - argocd
+      validate:
+        message: "Pods must set runAsNonRoot: true in the pod-level securityContext."
+        pattern:
+          spec:
+            securityContext:
+              runAsNonRoot: true
+    # Container-level check: a pod-level runAsNonRoot: true can be overridden by
+    # setting runAsNonRoot: false or runAsUser: 0 in the container securityContext.
+    # This rule prevents that bypass path.
+    - name: deny-container-run-as-root
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kyverno
+                - argocd
+      validate:
+        message: "Containers must not override runAsNonRoot or set runAsUser: 0."
+        foreach:
+          - list: >-
+              request.object.spec.containers +
+              request.object.spec.initContainers +
+              request.object.spec.ephemeralContainers
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.securityContext.runAsNonRoot }}"
+                    operator: Equals
+                    value: false
+                  - key: "{{ element.securityContext.runAsUser }}"
+                    operator: Equals
+                    value: 0
+    - name: require-drop-all
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kyverno
+                - argocd
+      validate:
+        message: "Containers must drop ALL capabilities."
+        foreach:
+          - list: >-
+              request.object.spec.containers +
+              request.object.spec.initContainers +
+              request.object.spec.ephemeralContainers
+            deny:
+              conditions:
+                all:
+                  - key: "DROP"
+                    operator: AnyNotIn
+                    value: "{{ element.securityContext.capabilities.drop[] | map(&to_upper(@), @) }}"

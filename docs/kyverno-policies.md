@@ -2,6 +2,12 @@
 
 Reference for the four ClusterPolicies in this repository.
 
+> **Source of truth:** `kyverno/policies/` in this repo. Policies are fetched
+> directly from `main` by `argocd-eks-terraform/stacks/kyverno/policies.tf`
+> via `data "http"` + `yamldecode()` and applied to both EKS clusters via
+> Spacelift. To update a policy: edit the YAML here, merge to `main`, then
+> trigger a Spacelift run on the kyverno stack.
+
 ## Policy Overview
 
 All policies run in `Enforce` mode and target `Pod` resources. Targeting Pods (rather than Deployments) ensures enforcement across all workload types — Deployments, DaemonSets, StatefulSets, Jobs, and manual pod creation.
@@ -110,15 +116,14 @@ pass: 10, fail: 0, skip: 0, error: 0
 
 ## Adding a New Policy
 
-ClusterPolicies are managed in [argocd-eks-terraform](https://github.com/fearfactor3/argocd-eks-terraform)
-under `stacks/kyverno/policies.tf` and applied to both clusters via Spacelift.
+1. Create `kyverno/policies/<policy-name>.yaml` as a `ClusterPolicy` targeting `Pod`
+2. Add a `data "http"` + `kubernetes_manifest` block to `stacks/kyverno/policies.tf`
+   in [argocd-eks-terraform](https://github.com/fearfactor3/argocd-eks-terraform)
+   pointing at the new file URL
+3. Add a failing test fixture to `kyverno/tests/resources/fail-<violation>.yaml`
+4. Update `kyverno/tests/kyverno-test.yaml` with the expected result
+5. Run `make test` locally to validate before opening a PR
+6. Merge to `main` — Spacelift picks up the new URL and applies the policy
 
-To add a new policy:
-
-1. Add a `kubernetes_manifest` resource to `stacks/kyverno/policies.tf` in `argocd-eks-terraform`
-2. Add a failing test fixture to `kyverno/tests/resources/fail-<violation>.yaml` in this repo
-3. Update `kyverno/tests/kyverno-test.yaml` with the expected result
-4. Run `make test` locally to validate against the Kyverno CLI before opening a PR
-
-Use `validationFailureAction: Audit` in the Terraform resource during development to
-observe violations without blocking pods, then change to `Enforce` once validated.
+Use `validationFailureAction: Audit` during development to observe violations
+without blocking pods, then switch to `Enforce` once validated.
