@@ -31,9 +31,9 @@ spec:
             deny:
               conditions:
                 any:
-                  - key: "{{ element.livenessProbe | length(@) }}"
+                  - key: "{{ element.livenessProbe }}"
                     operator: Equals
-                    value: 0
+                    value: null
     - name: require-readiness-probe
       match:
         any:
@@ -55,6 +55,6 @@ spec:
             deny:
               conditions:
                 any:
-                  - key: "{{ element.readinessProbe | length(@) }}"
+                  - key: "{{ element.readinessProbe }}"
                     operator: Equals
-                    value: 0
+                    value: null
