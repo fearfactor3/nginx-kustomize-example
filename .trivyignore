@@ -1,0 +1,10 @@
+# Trivy ignore file — plain text format, one check ID per line.
+# Path-scoped suppression is not supported here; see REPOSITORY_TRIVY_ARGUMENTS
+# in .mega-linter.yml for --skip-files targeting Kustomize patch files.
+#
+# Overlay patches (overlays/dev/deployment.yaml, overlays/prod/deployment.yaml)
+# are excluded via --skip-files because Trivy scans them as standalone Deployments
+# without the base securityContext. They are Kustomize patches, not full manifests.
+#
+# Kyverno test fixtures under kyverno/tests/resources/fail-*.yaml are intentionally
+# non-compliant for specific policy rules only; all other security controls are set.

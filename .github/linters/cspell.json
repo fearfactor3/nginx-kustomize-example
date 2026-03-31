@@ -1,0 +1,38 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "dictionaries": ["en_US", "en-GB", "softwareTerms", "bash", "k8s"],
+  "words": [
+    "actionlint",
+    "argocd",
+    "commitlint",
+    "commitlintrc",
+    "eksbuild",
+    "behaviour",
+    "fearfactor",
+    "finalizer",
+    "hotfixes",
+    "gitops",
+    "gitleaks",
+    "imranismail",
+    "kubeconform",
+    "kyverno",
+    "markdownlint",
+    "megalinter",
+    "misconfigs",
+    "sarif",
+    "SARIF",
+    "selfheal",
+    "Spacelift",
+    "tfvars",
+    "trivy",
+    "trufflehog",
+    "yamllint",
+    "yamldecode",
+    "yannh"
+  ],
+  "ignorePaths": [
+    "megalinter-reports/",
+    ".git/"
+  ]
+}

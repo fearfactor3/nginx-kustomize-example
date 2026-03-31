@@ -1,0 +1,60 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-probes
+  annotations:
+    policies.kyverno.io/title: Require Liveness and Readiness Probes
+    policies.kyverno.io/description: >-
+      All containers must define liveness and readiness probes.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-liveness-probe
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kyverno
+                - argocd
+      validate:
+        message: "Liveness probe is required for all containers."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "livenessProbe"
+                    operator: AnyNotIn
+                    value: "{{ keys(element) }}"
+    - name: require-readiness-probe
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kyverno
+                - argocd
+      validate:
+        message: "Readiness probe is required for all containers."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "readinessProbe"
+                    operator: AnyNotIn
+                    value: "{{ keys(element) }}"

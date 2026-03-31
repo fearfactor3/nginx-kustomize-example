@@ -3,6 +3,11 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - ../../base
+  - hpa.yaml
+  - pdb.yaml
+  - resource-quota.yaml
+  - limit-range.yaml
 namespace: nginx-prod
 patches:
   - path: ./deployment.yaml
+  - path: ./network-policy.yaml

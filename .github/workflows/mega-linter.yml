@@ -1,0 +1,46 @@
+name: megalinter
+
+on:
+  pull_request:
+    branches: [main]
+  # Weekly full-codebase scan — catches new CVEs and misconfigs in unchanged
+  # files that would otherwise never trigger a PR-based scan.
+  schedule:
+    - cron: "0 7 * * 1" # every Monday at 07:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+  statuses: write
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  megalinter:
+    name: MegaLinter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Run MegaLinter
+        uses: oxsecurity/megalinter/flavors/cupcake@8fbdead70d1409964ab3d5afa885e18ee85388bb # v9.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # On PRs scan only changed files (fast). On scheduled runs and
+          # manual dispatches scan everything so new CVEs in untouched files
+          # are not missed.
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+
+      - name: Upload SARIF report
+        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
+        if: always()
+        with:
+          sarif_file: megalinter-reports/megalinter-report.sarif
+          category: megalinter

@@ -1,0 +1,71 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: nginx-policy-tests
+policies:
+  - ../policies/require-image-tag.yaml
+  - ../policies/require-resource-limits.yaml
+  - ../policies/require-non-root.yaml
+  - ../policies/require-probes.yaml
+resources:
+  - resources/passing-pod.yaml
+  - resources/fail-latest-tag.yaml
+  - resources/fail-no-limits.yaml
+  - resources/fail-root-container.yaml
+  - resources/fail-no-probes.yaml
+results:
+  - policy: require-image-tag
+    rule: require-image-tag
+    resource: passing-pod
+    kind: Pod
+    result: pass
+  - policy: require-image-tag
+    rule: require-image-tag
+    resource: fail-latest-tag
+    kind: Pod
+    result: fail
+  - policy: require-resource-limits
+    rule: require-resource-limits
+    resource: passing-pod
+    kind: Pod
+    result: pass
+  - policy: require-resource-limits
+    rule: require-resource-limits
+    resource: fail-no-limits
+    kind: Pod
+    result: fail
+  - policy: require-non-root
+    rule: require-run-as-non-root
+    resource: passing-pod
+    kind: Pod
+    result: pass
+  - policy: require-non-root
+    rule: require-run-as-non-root
+    resource: fail-root-container
+    kind: Pod
+    result: fail
+  - policy: require-non-root
+    rule: require-drop-all
+    resource: passing-pod
+    kind: Pod
+    result: pass
+  - policy: require-probes
+    rule: require-liveness-probe
+    resource: passing-pod
+    kind: Pod
+    result: pass
+  - policy: require-probes
+    rule: require-liveness-probe
+    resource: fail-no-probes
+    kind: Pod
+    result: fail
+  - policy: require-probes
+    rule: require-readiness-probe
+    resource: passing-pod
+    kind: Pod
+    result: pass
+  - policy: require-probes
+    rule: require-readiness-probe
+    resource: fail-no-probes
+    kind: Pod
+    result: fail
