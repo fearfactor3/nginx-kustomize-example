@@ -75,25 +75,27 @@ kubectl get applications -n argocd
 
 ## First-Time Cluster Bootstrap
 
-After gaining cluster access, apply the Kyverno policies, AppProject, and ArgoCD Applications once per cluster. ArgoCD will manage all subsequent changes via GitOps.
+Kyverno and its ClusterPolicies are managed by the `stacks/kyverno` stack in
+[argocd-eks-terraform](https://github.com/fearfactor3/argocd-eks-terraform) and are
+applied automatically via Spacelift. No manual policy steps are required here.
+
+After gaining cluster access, apply the ArgoCD AppProject and Applications once per
+cluster. ArgoCD will manage all subsequent changes via GitOps.
 
 ```shell
-# 1. Apply admission policies (Kyverno must be running first)
-kubectl apply -f kyverno/policies/
-
-# 2. Create the ArgoCD AppProject (restricts sources, destinations, and resource types)
+# 1. Create the ArgoCD AppProject (restricts sources, destinations, and resource types)
 kubectl apply -f argocd/project.yaml
 
-# 3. Register the ArgoCD Applications
+# 2. Register the ArgoCD Applications
 kubectl apply -f argocd/app-dev.yaml
 kubectl apply -f argocd/app-prod.yaml
 
-# 4. Label namespaces that need HTTP access to nginx
+# 3. Label namespaces that need HTTP access to nginx
 #    (ingress controller, monitoring — adjust to match your cluster)
 kubectl label namespace ingress-nginx nginx-access=true
 kubectl label namespace monitoring nginx-access=true
 
-# 5. Watch initial sync
+# 4. Watch initial sync
 kubectl get applications -n argocd -w
 ```
 

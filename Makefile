@@ -11,7 +11,7 @@ KUBECONFORM_VERSION ?= v0.6.7
 KUSTOMIZE_VERSION   ?= 5.4.3
 
 .PHONY: all lint build validate test \
-        policy-apply argocd-apply \
+        argocd-apply \
         apply-dev apply-prod diff-dev diff-prod \
         check-context install-tools help
 
@@ -34,9 +34,6 @@ test: ## Kyverno CLI policy tests — expect pass:11 fail:0
 	$(KYVERNO) test kyverno/tests/
 
 ## ── Cluster bootstrap (one-time) ─────────────────────────────────────────────
-
-policy-apply: ## Apply Kyverno ClusterPolicies to current kubectl context
-	$(KUBECTL) apply -f kyverno/policies/
 
 argocd-apply: ## Apply ArgoCD AppProject + Applications to current kubectl context
 	$(KUBECTL) apply -f argocd/project.yaml

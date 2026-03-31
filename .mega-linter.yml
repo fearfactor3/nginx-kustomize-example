@@ -6,11 +6,13 @@
 APPLY_FIXES: none
 
 ENABLE_LINTERS:
-  - ACTION_ACTIONLINT
-  - REPOSITORY_GITLEAKS
-  - REPOSITORY_TRIVY
-  - YAML_YAMLLINT
-  - MARKDOWN_MARKDOWNLINT
+  - ACTION_ACTIONLINT       # GitHub Actions syntax validation
+  - REPOSITORY_GITLEAKS     # Secret scanning
+  - REPOSITORY_TRUFFLEHOG   # Deep secret scanning (complementary to Gitleaks)
+  - REPOSITORY_TRIVY        # IaC misconfiguration + CVE scanning
+  - SPELL_CSPELL            # Spell check (docs, comments, YAML keys)
+  - YAML_YAMLLINT           # YAML style enforcement
+  - MARKDOWN_MARKDOWNLINT   # Markdown quality
 
 VALIDATE_ALL_CODEBASE: false
 FLAVOR_SUGGESTIONS: false

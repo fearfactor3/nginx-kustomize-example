@@ -32,7 +32,7 @@ Both Applications belong to the `nginx` AppProject ([argocd/project.yaml](../arg
 
 - **Source restriction** — only this repository's URL is permitted
 - **Destination restriction** — deployments only to `nginx-dev` and `nginx-prod` namespaces on the in-cluster server
-- **Resource whitelist** — only the resource types used by this repo can be managed (Deployment, Service, ServiceAccount, HPA, PDB, NetworkPolicy, ResourceQuota, LimitRange, VPA, Namespace)
+- **Resource whitelist** — only the resource types used by this repo can be managed (Deployment, Service, ServiceAccount, HPA, PDB, NetworkPolicy, ResourceQuota, LimitRange, Namespace)
 
 Apply the AppProject before the Applications:
 
@@ -116,6 +116,6 @@ Each environment gets its own namespace with Pod Security Standards `restricted`
 | Namespace | Replicas | HPA | PDB | ResourceQuota |
 | --- | --- | --- | --- | --- |
 | `nginx-dev` | 1 | — | — | — |
-| `nginx-prod` | 3 (min) | 3–10 | minAvailable: 2 | 10 pods, 1500m CPU, 1280Mi memory |
+| `nginx-prod` | 3 (min) | 3–10 | minAvailable: 2 | 12 pods, 1500m CPU, 1280Mi memory |
 
 Namespaces are created by the `namespace.yaml` resources in each overlay. ArgoCD's `CreateNamespace=true` also creates them on first sync if applied before the namespace manifests.

@@ -7,10 +7,10 @@ Daily workflow for contributing to this repository.
 Changes are validated at three points before reaching the cluster:
 
 | Layer | Tool | When | What it checks |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1 — Pre-commit | check-yaml, commitlint, kustomize-build | Every local commit | YAML syntax, commit message format, overlay renders |
 | 2 — CI | yamllint, kustomize build, kubeconform, kyverno test | Every PR | Style, schema, Kyverno policy correctness |
-| 3 — MegaLinter | actionlint, gitleaks, trivy, yamllint, markdownlint | Every PR + weekly | Secrets, CVEs, workflow syntax, Markdown quality |
+| 3 — MegaLinter | actionlint, gitleaks, trufflehog, trivy, cspell, yamllint, markdownlint | Every PR + weekly | Secrets, CVEs, workflow syntax, spelling, Markdown quality |
 
 Fix failures at the lowest layer first — a pre-commit failure means the issue would also fail CI.
 
@@ -28,7 +28,7 @@ Or individually:
 make lint      # yamllint style check
 make build     # kustomize build for dev + prod overlays
 make validate  # kubeconform K8s 1.32 schema validation
-make test      # kyverno CLI policy tests — expect pass:11 fail:0
+make test      # kyverno CLI policy tests — expect pass:10 fail:0
 ```
 
 ## Minikube Workflow
@@ -42,10 +42,13 @@ minikube addons enable metrics-server
 
 # 2. Install Kyverno (pinned to match EKS clusters)
 helm repo add kyverno https://kyverno.github.io/kyverno/
-helm install kyverno kyverno/kyverno --version 3.3.7 -n kyverno --create-namespace
+helm install kyverno kyverno/kyverno --version 3.5.3 -n kyverno --create-namespace
 
-# 3. Apply policies and ArgoCD AppProject
-kubectl apply -f kyverno/policies/
+# 3. Apply ClusterPolicies (managed by argocd-eks-terraform in production)
+#    For local testing, apply the policy YAMLs directly from that repo or copy them
+kubectl apply -f <path-to-argocd-eks-terraform>/stacks/kyverno/policies/
+
+# 4. Apply ArgoCD AppProject
 kubectl apply -f argocd/project.yaml
 
 # 4. Deploy and verify
@@ -65,15 +68,12 @@ kubectl get hpa,pdb -n nginx-prod
 kubectl get resourcequota -n nginx-prod
 ```
 
-## VPA Recommendations (dev only)
+## Tuning Resource Requests
 
-The dev overlay deploys a VPA in recommendation-only mode (`updateMode: Off`). After 7+ days of traffic, query collected recommendations to validate or further tune the resource requests in both overlays:
+After 7+ days of production traffic, review CloudWatch Container Insights or Prometheus metrics to validate the resource requests defined in `overlays/prod/deployment.yaml`. When adjusting:
 
-```shell
-kubectl get vpa nginx-vpa -n nginx-dev -o json | jq '.status.recommendation'
-```
-
-The output shows `lowerBound`, `target`, and `upperBound` for CPU and memory. Update `overlays/dev/deployment.yaml` and `overlays/prod/deployment.yaml` resource values accordingly, then update `overlays/prod/resource-quota.yaml` in lockstep.
+- Update `requests` and `limits` in `overlays/prod/deployment.yaml`
+- Update `overlays/prod/resource-quota.yaml` and `overlays/prod/limit-range.yaml` in lockstep (quota is sized to `maxReplicas × requests + buffer`)
 
 ## Commit Message Format
 

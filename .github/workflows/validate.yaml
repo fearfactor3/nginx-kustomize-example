@@ -79,10 +79,12 @@ jobs:
       - name: Write job summary
         if: always()
         run: |
-          echo "## Kubeconform — \`${{ matrix.overlay }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo '```json' >> "$GITHUB_STEP_SUMMARY"
-          cat /tmp/kubeconform-${{ matrix.overlay }}.json >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Kubeconform — \`${{ matrix.overlay }}\`"
+            echo '```json'
+            cat /tmp/kubeconform-${{ matrix.overlay }}.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   kyverno-test:
     name: Kyverno Policy Tests
@@ -110,7 +112,9 @@ jobs:
       - name: Write job summary
         if: always()
         run: |
-          echo "## Kyverno Policy Tests" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          cat /tmp/kyverno-results.txt >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Kyverno Policy Tests"
+            echo '```'
+            cat /tmp/kyverno-results.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

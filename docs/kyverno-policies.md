@@ -105,15 +105,20 @@ Expected output:
 
 ```text
 Executing nginx-policy-tests...
-pass: 11, fail: 0, skip: 0, error: 0
+pass: 10, fail: 0, skip: 0, error: 0
 ```
 
 ## Adding a New Policy
 
-1. Create `kyverno/policies/<policy-name>.yaml` as a `ClusterPolicy` targeting `Pod`
-2. Add a passing resource to `kyverno/tests/resources/passing-pod.yaml` (or keep the existing one if it already satisfies the new policy)
-3. Add a failing resource to `kyverno/tests/resources/fail-<violation>.yaml`
-4. Add the expected results to `kyverno/tests/kyverno-test.yaml`
-5. Run `make test` to verify all results match
+ClusterPolicies are managed in [argocd-eks-terraform](https://github.com/fearfactor3/argocd-eks-terraform)
+under `stacks/kyverno/policies.tf` and applied to both clusters via Spacelift.
 
-Use `validationFailureAction: Audit` during development to see violations without blocking pods, then switch to `Enforce` once the policy is validated.
+To add a new policy:
+
+1. Add a `kubernetes_manifest` resource to `stacks/kyverno/policies.tf` in `argocd-eks-terraform`
+2. Add a failing test fixture to `kyverno/tests/resources/fail-<violation>.yaml` in this repo
+3. Update `kyverno/tests/kyverno-test.yaml` with the expected result
+4. Run `make test` locally to validate against the Kyverno CLI before opening a PR
+
+Use `validationFailureAction: Audit` in the Terraform resource during development to
+observe violations without blocking pods, then change to `Enforce` once validated.
