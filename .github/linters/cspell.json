@@ -28,6 +28,7 @@
     "trivy",
     "trufflehog",
     "yamllint",
+    "yamldecode",
     "yannh"
   ],
   "ignorePaths": [
