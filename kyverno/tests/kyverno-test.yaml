@@ -3,10 +3,10 @@ kind: Test
 metadata:
   name: nginx-policy-tests
 policies:
-  - ../../policies/require-image-tag.yaml
-  - ../../policies/require-resource-limits.yaml
-  - ../../policies/require-non-root.yaml
-  - ../../policies/require-probes.yaml
+  - ../policies/require-image-tag.yaml
+  - ../policies/require-resource-limits.yaml
+  - ../policies/require-non-root.yaml
+  - ../policies/require-probes.yaml
 resources:
   - resources/passing-pod.yaml
   - resources/fail-latest-tag.yaml
