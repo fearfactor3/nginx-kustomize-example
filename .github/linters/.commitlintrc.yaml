@@ -1,0 +1,38 @@
+extends:
+  - "@commitlint/config-conventional"
+
+helpUrl: https://github.com/fearfactor3/nginx-kustomize-example#commit-message-format
+
+# Allowed types
+# fix | feat | docs | style | refactor | test | chore | ci
+#
+# Allowed scopes
+# base      - Changes to base Kustomize manifests (deployment, service)
+# overlays  - Changes to dev/prod overlay patches, HPA, PDB, namespaces
+# kyverno   - Kyverno ClusterPolicies and test fixtures
+# argocd    - ArgoCD Application manifests
+# ci        - GitHub Actions workflows and linting configuration
+# deps      - Dependency updates (pre-commit hook versions, tool pinning)
+# docs      - README and documentation
+#
+# Examples
+# feat(base): add liveness and readiness probes to nginx deployment
+# fix(overlays): correct prod HPA minReplicas to match replica count
+# feat(kyverno): add require-probes ClusterPolicy
+# chore(ci): pin kyverno CLI to v1.13.6
+# docs(readme): add minikube quick-start section
+
+rules:
+  type-enum:
+    - 2
+    - always
+    - [fix, feat, docs, style, refactor, test, chore, ci]
+
+  scope-enum:
+    - 2
+    - always
+    - [base, overlays, kyverno, argocd, ci, deps, docs]
+
+  scope-empty:
+    - 2
+    - never

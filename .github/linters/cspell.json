@@ -1,0 +1,30 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "dictionaries": ["en_US", "softwareTerms", "bash", "k8s"],
+  "words": [
+    "kubeconform",
+    "kyverno",
+    "kustomize",
+    "kustomization",
+    "megalinter",
+    "yamllint",
+    "actionlint",
+    "gitleaks",
+    "trivy",
+    "argocd",
+    "selfheal",
+    "nginx",
+    "unprivileged",
+    "seccomp",
+    "eksbuild",
+    "commitlint",
+    "markdownlint",
+    "renovate",
+    "fearfactor"
+  ],
+  "ignorePaths": [
+    "megalinter-reports/",
+    ".git/"
+  ]
+}

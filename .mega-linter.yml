@@ -1,0 +1,29 @@
+# MegaLinter configuration
+# Docs: https://megalinter.io/latest/configuration/
+# Flavor: cupcake — covers YAML, Markdown, GitHub Actions, Gitleaks, Trivy
+# without language-runtime overhead (~400MB vs ~2GB for base image).
+
+APPLY_FIXES: none
+
+ENABLE_LINTERS:
+  - ACTION_ACTIONLINT
+  - REPOSITORY_GITLEAKS
+  - REPOSITORY_TRIVY
+  - YAML_YAMLLINT
+  - MARKDOWN_MARKDOWNLINT
+
+VALIDATE_ALL_CODEBASE: false
+FLAVOR_SUGGESTIONS: false
+FILTER_REGEX_EXCLUDE: "(megalinter-reports/)"
+
+REPOSITORY_TRIVY_ARGUMENTS: >-
+  --severity CRITICAL,HIGH
+  --skip-files overlays/dev/deployment.yaml,overlays/prod/deployment.yaml
+
+YAML_YAMLLINT_CONFIG_FILE: .github/linters/.yamllint
+MARKDOWN_MARKDOWNLINT_CONFIG_FILE: .github/linters/.markdownlint.json
+
+SHOW_ELAPSED_TIME: true
+SARIF_REPORTER: true
+FILEIO_REPORTER: false
+UPDATED_SOURCES_REPORTER: false

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: nginx-quota
+spec:
+  hard:
+    # Sized to HPA maxReplicas (10) × right-sized requests/limits + small buffer.
+    # Update these values in lockstep with overlays/prod/deployment.yaml resources.
+    requests.cpu: "1500m"      # 10 × 150m
+    requests.memory: "1280Mi"  # 10 × 128Mi
+    limits.cpu: "5"            # 10 × 500m
+    limits.memory: "2560Mi"    # 10 × 256Mi
+    pods: "12"                 # HPA max (10) + 2 for rolling update surge

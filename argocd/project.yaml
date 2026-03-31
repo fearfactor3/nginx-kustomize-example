@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: nginx
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: nginx application project — dev and prod environments
+
+  # Only allow sync from this repository
+  sourceRepos:
+    - https://github.com/fearfactor3/nginx-kustomize-example.git
+
+  # Only allow deployments to the local in-cluster namespaces
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: nginx-dev
+    - server: https://kubernetes.default.svc
+      namespace: nginx-prod
+
+  # Restrict which Kubernetes resources this project can manage
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+
+  namespaceResourceWhitelist:
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ServiceAccount
+    - group: ""
+      kind: ResourceQuota
+    - group: ""
+      kind: LimitRange
+    - group: "autoscaling"
+      kind: HorizontalPodAutoscaler
+    - group: "policy"
+      kind: PodDisruptionBudget
+    - group: "networking.k8s.io"
+      kind: NetworkPolicy
+    - group: "autoscaling.k8s.io"
+      kind: VerticalPodAutoscaler

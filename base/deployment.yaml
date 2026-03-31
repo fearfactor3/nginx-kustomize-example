@@ -2,18 +2,93 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
+  labels:
+    app.kubernetes.io/name: nginx
+    app.kubernetes.io/component: server
+    app.kubernetes.io/managed-by: kustomize
 spec:
   replicas: 2
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: nginx
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
         app: nginx
+        app.kubernetes.io/name: nginx
+        app.kubernetes.io/component: server
     spec:
+      # Allow in-flight requests to drain before the pod is removed.
+      # preStop sleep gives the endpoint controller time to propagate the
+      # removal before nginx receives SIGTERM.
+      serviceAccountName: nginx
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
       containers:
-      - name: nginx
-        image: nginx:latest
-        ports:
-        - containerPort: 80
+        - name: nginx
+          image: nginxinc/nginx-unprivileged:1.27.4
+          ports:
+            - containerPort: 8080
+          lifecycle:
+            preStop:
+              exec:
+                # Sleep gives kube-proxy / endpoint controller time to remove
+                # this pod from Service endpoints before nginx stops accepting
+                # connections, preventing 502s during rolling updates.
+                command: ["/bin/sh", "-c", "sleep 5"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            # nginx-unprivileged writes to these paths at runtime.
+            # emptyDir mounts allow readOnlyRootFilesystem: true on the rest of the FS.
+            - name: tmp
+              mountPath: /tmp
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: nginx-run
+              mountPath: /var/run
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            # 12 × 5s = 60s total startup budget before liveness takes over.
+            failureThreshold: 12
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}

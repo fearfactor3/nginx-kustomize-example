@@ -1,0 +1,39 @@
+# Claude Code
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Kubeconfig — never commit cluster credentials
+kubeconfig
+kubeconfig.yaml
+*.kubeconfig
+
+# Rendered kustomize output — build artifacts, not source
+kustomize-output/
+rendered/
+
+# MegaLinter report output
+megalinter-reports/
+
+# Kyverno CLI test output
+kyverno-report*.json
+
+# pip / Python (yamllint install)
+__pycache__/
+*.pyc
+.venv/
+
+# pre-commit cache
+.pre-commit-cache/
+
+# Temporary files
+*.tmp
+*.bak

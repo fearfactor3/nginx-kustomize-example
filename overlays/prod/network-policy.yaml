@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nginx-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: nginx
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Only allow traffic from namespaces explicitly labelled nginx-access: "true".
+    # Apply this label to the ingress controller and monitoring namespaces:
+    #   kubectl label namespace ingress-nginx nginx-access=true
+    #   kubectl label namespace monitoring nginx-access=true
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              nginx-access: "true"
+      ports:
+        - port: 8080
+          protocol: TCP
+  egress:
+    # DNS only — nginx serves static content and makes no upstream calls
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP

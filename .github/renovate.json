@@ -1,0 +1,63 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "labels": ["dependencies"],
+  "pre-commit": {
+    "enabled": true
+  },
+  "github-actions": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "description": "Group all GitHub Actions digest updates together",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "automerge": false
+    },
+    {
+      "description": "Auto-merge pre-commit hook patch updates",
+      "matchManagers": ["pre-commit"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "kubeconform version in validate.yaml",
+      "fileMatch": ["\\.github/workflows/validate\\.yaml"],
+      "matchStrings": ["KUBECONFORM_VERSION:\\s+\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "yannh/kubeconform",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "description": "kyverno CLI version in validate.yaml",
+      "fileMatch": ["\\.github/workflows/validate\\.yaml"],
+      "matchStrings": ["KYVERNO_VERSION:\\s+\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "kyverno/kyverno",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "description": "nginx/nginx-unprivileged image tag in base deployment",
+      "fileMatch": ["base/deployment\\.yaml"],
+      "matchStrings": ["image:\\s+nginx/nginx-unprivileged:(?<currentValue>[^\\s]+)"],
+      "depNameTemplate": "nginx/nginx-unprivileged",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "kustomize version in validate.yaml",
+      "fileMatch": ["\\.github/workflows/validate\\.yaml"],
+      "matchStrings": ["kustomize-version:\\s+\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "kubernetes-sigs/kustomize",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^kustomize/v(?<version>.+)$"
+    }
+  ]
+}

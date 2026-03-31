@@ -6,12 +6,31 @@ spec:
   replicas: 3
   template:
     spec:
+      topologySpreadConstraints:
+        # ScheduleAnyway: allows rescheduling across remaining zones during an AZ
+        # outage rather than blocking pod placement entirely.
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: nginx
+        # DoNotSchedule: hard anti-affinity within a zone — no two replicas on same node.
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: nginx
       containers:
         - name: nginx
+          # Static nginx CPU/memory usage is low. Requests are sized to observed
+          # p99 for static-content serving; limits give 3x headroom for bursts.
+          # Revisit after 2 weeks of Prometheus/CloudWatch Container Insights data.
           resources:
             limits:
-              cpu: "2"
-              memory: "2Gi"
+              cpu: "500m"
+              memory: "256Mi"
             requests:
-              cpu: "1"
-              memory: "1Gi"
+              cpu: "150m"
+              memory: "128Mi"
